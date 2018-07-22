@@ -5,7 +5,7 @@
         <h1>WebCrawler</h1>
         <small>Enter your target!</small>
 
-        <form action="#" id="crawler">
+        <form action="{{ url_for('process') }}" method="post" id="crawler">
             <div class="form-group">
                 <label for="inputTarget" class="sr-only">Website Address :</label>
                 <input type="text" name="website" id="inputTarget" class="form-control" placeholder="https://esgi.fr" required autofocus>
@@ -13,53 +13,60 @@
             <button class="btn btn-danger" type="submit">Process!</button>
         </form>
 
+        <hr/>
+        <h3>Results : </h3>
+        <ul class="list-group" id="scrapdiv">
+
+        </ul>
+
     </div>
 {% endblock %}
 {% block javascript %}
 
     <script>
 
-        /**
-         * connect to the websocket flask-socketio and send the value of the url with the key "crawl_website"
-         **/
         $(document).ready(function(){
-            let socket = io.connect('http://' + document.domain + ':' + location.port + '/crawler');
 
             $( "#crawler" ).submit(function( event ) {
+                // On empêche l'envoie du formulaire par le navigateur.
                 event.preventDefault();
-                socket.emit('crawl_website', {url: $("#inputTarget").val()})
+
+                // On recupére le parametre target de l'utilisateur (le site à crawl)
+                let target = $("#inputTarget").val();
+
+                // On poste vers /process la site à crawl.
+                $.post('{{ url_for('process') }}', {website: target}, function(data){
+
+
+                    function poll(){
+                        // On envoie une requête pour voir si le crawl est terminé.
+                        $.post('{{ url_for('results') }}', {website: target}, function(response){
+
+                            // Si response.result est "DONE", alors le crawl est terminé, et on peut afficher les resultats.
+                            if (response.result === 'DONE'){
+                                console.log(response);
+
+                                // On remplie une liste avec les differents resultats.
+                                $.each(response.data, function(index, value){
+                                    $('#scrapdiv').append('  <li class="list-group-item">[' + value.status + '] ' + value.url + ' [Body Length : ' + value.len + ']</li>\n');
+                                });
+
+                                // On termine la boucle qui va chercher le bordel toutes les demi secondes.
+                                window.clearInterval(interval)
+                            }
+                            else
+                            {
+                                // Le resultat n'est pas "DONE", le crawl est pas encore terminé.
+                                console.log('Waiting data...');
+                            }
+                        })
+                    }
+
+                    // Toutes les demi-secondes, on appelle la fonction poll pour savoir si le crawl et terminé, et si un resultat est disponible.
+                    let interval = setInterval(poll, 500);
+                })
 
             });
-/*
-            socket.on('processing', function(msg){
-                function poll(){
-                    socket.emit('poll_result', {});
-                }
-                let interval = setInterval(poll, 500);
-            });
-*/          /**
-             * return the result of the websocket
-             **/
-            socket.on('result', function(msg){
-                console.log(msg);
-            });
-
-            /*
-            //receive details from server
-            socket.on('newnumber', function(msg) {
-                console.log("Received number" + msg.number);
-                //maintain a list of ten numbers
-                if (numbers_received.length >= 10){
-                    numbers_received.shift()
-                }
-                numbers_received.push(msg.number);
-                numbers_string = '';
-                for (var i = 0; i < numbers_received.length; i++){
-                    numbers_string = numbers_string + '<p>' + numbers_received[i].toString() + '</p>';
-                }
-                $('#log').html(numbers_string);
-            });
-            */
         });
 
     </script>

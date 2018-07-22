@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from twisted.internet import reactor
 from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import Rule, CrawlSpider
-from scrapy.crawler import CrawlerProcess, CrawlerRunner
 from scrapy.http import Request, HtmlResponse
 from urllib.parse import urlparse
-from queue import Queue
-from multiprocessing import Process
 
 class ScrapResultItem(scrapy.Item):
     url = scrapy.Field()
@@ -16,59 +11,52 @@ class ScrapResultItem(scrapy.Item):
 class WebSpider(scrapy.Spider):
     name = 'webcrawler'
 
+
     def __init__(self, **kw):
         super(WebSpider, self).__init__(**kw)
 
+        #  On stocke dans la variable url le site à crawler.
         url = kw.get('target')
-        queue = kw.get('queue')
 
+        #  On s'assure que le lien à crawler contient bien http:// ou https://
         if not url.startswith('http://') and not url.startswith('https://'):
             url = 'http://%s/' % url
 
         self.url = url
+
+        #  On evite de taper sur les autres sites que celui indiqué par le crawler.
         self.allowed_domains = [urlparse(url).hostname]
+
+        #  On declare notre fonction chargée de l'extraction des liens.
         self.link_extractor = LinkExtractor()
 
+        #  On initialise le stockage.
+        self.storage[self.url] = []
+
+
     def start_requests(self):
+        #  On envoie les requêtes!
         return [Request(self.url, callback=self.parse, dont_filter=True)]
 
+
     def parse(self, response):
+        #  On stocke un objet qui pointe vers l'URL que l'on vient de crawler (afin deviter les duplicats)
         page = ScrapResultItem(url=response.url)
 
-        if self.callback and callable(self.callback):
-            self.callback(response)
-
+        #  On ajoute dans le storage, toutes les informations que l'on veut retourner a l'utilisateur.
+        self.storage[self.url].append({'url': response.url, 'len': len(response.body), 'status': response.status})
 
         r = [page]
+
+        #  On extrait les differents liens de la page que l'on traite par la suite.
         r.extend(self._extract_requests(response))
         return r
+
 
     def _extract_requests(self, response):
         r = []
         if isinstance(response, HtmlResponse):
+            #  On parse les differents liens...
             links = self.link_extractor.extract_links(response)
             r.extend(Request(x.url, callback=self.parse) for x in links)
         return r
-
-   def launch_crawler(target, callback):
-    process_queue = Queue()
-
-    def process(target, callback):
-        try:
-            process = CrawlerRunner({
-                'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
-                'CLOSESPIDER_ITEMCOUNT': 10
-            })
-
-            d = process.crawl(WebSpider, target=target, callback=proces)
-            d.addBoth(lambda _: reactor.stop())
-
-            reactor.run(0)
-
-        except Exception as e:
-            return
-
-    p = Process(target=process, args=(target, callback))
-    p.start()
-    print(p.join())
-    print('DONE')
