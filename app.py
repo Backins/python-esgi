@@ -2,6 +2,7 @@
 # EN - HELP With crochet, we can use asynchrones Twisted app in synchrone context/
 
 import crochet
+import json
 crochet.setup()
 
 from flask import Flask, render_template, request, jsonify
@@ -109,3 +110,13 @@ if __name__ == '__main__':
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.config['FLASK_DEBUG'] = True
     app.run(debug=True)
+
+
+@app.route('/savefile', methods=['POST'])
+def savefile():
+    jsonarray = request.json
+    with open('last-research.json', 'w') as outfile:
+        json.dump(jsonarray, outfile)
+    with open('all-research.json', 'w+') as outfile:
+        json.dump(jsonarray, outfile)
+    return render_template('home.html')
