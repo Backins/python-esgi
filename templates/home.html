@@ -28,41 +28,50 @@
         $(document).ready(function(){
 
             $( "#crawler" ).submit(function( event ) {
-                // On empêche l'envoie du formulaire par le navigateur.
+                // FR - HELP On empêche l'envoie du formulaire par le navigateur.
+                // EN - HELP We stop the form send by the browser
                 event.preventDefault();
 
-                // On recupére le parametre target de l'utilisateur (le site à crawl)
+                // FR - HELP On recupére le parametre target de l'utilisateur (le site à crawl)
+                // EN - HELP Get the parameter target of user (website to crawl)
                 let target = $("#inputTarget").val();
 
-                // On poste vers /process la site à crawl.
+                // FR - HELP On poste vers /process la site à crawl.
+                // EN - HELP Send data to /process, the website to crawl
                 $.post('{{ url_for('process') }}', {website: target}, function(data){
 
 
                     function poll(){
-                        // On envoie une requête pour voir si le crawl est terminé.
+                        // FR - HELP On envoie une requête pour voir si le crawl est terminé.
+                        // EN - HELP Send request to know if the crawl is done
                         $.post('{{ url_for('results') }}', {website: target}, function(response){
 
-                            // Si response.result est "DONE", alors le crawl est terminé, et on peut afficher les resultats.
+                            // FR - HELP Si response.result est "DONE", alors le crawl est terminé, et on peut afficher les resultats.
+                            // EN - HELP If response.result is done, then, the crawl is done to and we can show the results
                             if (response.result === 'DONE'){
                                 console.log(response);
 
-                                // On remplie une liste avec les differents resultats.
+                                // FR - HELP On remplie une liste avec les differents resultats.
+                                // EN - HELP We collect the data and show it in list with the different results
                                 $.each(response.data, function(index, value){
                                     $('#scrapdiv').append('  <li class="list-group-item">[' + value.status + '] ' + value.url + ' [Body Length : ' + value.len + ']</li>\n');
                                 });
 
-                                // On termine la boucle qui va chercher le bordel toutes les demi secondes.
+                                // FR - HELP On termine la boucle qui va chercher le bordel toutes les demi secondes.
+                                // EN - HELP We close the while
                                 window.clearInterval(interval)
                             }
                             else
                             {
-                                // Le resultat n'est pas "DONE", le crawl est pas encore terminé.
+                                // FR - HELP Le resultat n'est pas "DONE", le crawl est pas encore terminé.
+                                // EN - HELP the result isn't done, the crawl isn't completed
                                 console.log('Waiting data...');
                             }
                         })
                     }
 
-                    // Toutes les demi-secondes, on appelle la fonction poll pour savoir si le crawl et terminé, et si un resultat est disponible.
+                    // FR - HELP Toutes les demi-secondes, on appelle la fonction poll pour savoir si le crawl et terminé, et si un resultat est disponible.
+                    // EN - HELP All half secondes, we call the function poll to know if the crawl are done and if we can get the results
                     let interval = setInterval(poll, 500);
                 })
 
