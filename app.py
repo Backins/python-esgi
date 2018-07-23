@@ -3,6 +3,7 @@
 
 import crochet
 import json
+import os
 crochet.setup()
 
 from flask import Flask, render_template, request, jsonify
@@ -115,8 +116,18 @@ if __name__ == '__main__':
 @app.route('/savefile', methods=['POST'])
 def savefile():
     jsonarray = request.json
-    with open('last-research.json', 'w') as outfile:
+    with open('./static/last-research.json', 'w') as outfile:
         json.dump(jsonarray, outfile)
-    with open('all-research.json', 'a') as outfile:
+    with open('./static/all-research.json', 'a') as outfile:
         json.dump(jsonarray, outfile)
     return render_template('home.html')
+
+
+@app.route('/deletefiles', methods=['GET'])
+def deletefiles():
+    try:
+        os.remove('./static/all-research.json')
+        os.remove('./static/last-research.json')
+        return jsonify({'result':'true'})
+    except ValueError:
+        print('Erreur to delete file')

@@ -14,7 +14,12 @@
 
         <hr/>
         <h3>Options : </h3>
-            <button id="saveData" class="btn btn-primary disabled">Save results</button>
+            <button id="saveData" class="btn btn-light disabled">Save results</button>
+            <!--<button id="getStats" class="btn btn-info" data-toggle="modal" data-target="#modalShowAnalytics">Show analytics</button>-->
+            <a href="{{ url_for('static', filename='last-research.json') }}" class="btn btn-success">Download last research</a>
+            <a href="{{ url_for('static', filename='all-research.json') }}" class="btn btn-success">Download all research</a>
+            <a href="#" onclick="return deleteData();" class="btn btn-danger">Delete data</a>
+
         <h3>Results : </h3>
         <ul class="list-group" id="scrapdiv">
 
@@ -36,9 +41,29 @@
                     Save success, you can found your last data an all last data in the folder of your application with :
                 </p>
                 <ul class="list-group">
-                    <li>all-research.json : contains all research of your crawler</li>
-                    <li>last-research.json : contains last research of your crawler</li>
+                    <li class="list-group-item">all-research.json : contains all research of your crawler</li>
+                    <li class="list-group-item">last-research.json : contains last research of your crawler</li>
                 </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div id="modalDelete" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete logs</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    File successfully deleted
+                </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -48,7 +73,77 @@
     </div>
 {% endblock %}
 {% block javascript %}
+<script>
+    date = [];
+    data = [];
+    function deleteData()
+    {
+        if(prompt('Do you want really delete the data ?')){
+            $.get('{{ url_for('deletefiles') }}', function(data){
+                $('#modalDelete').modal('show');
+            });
+        }
+        return false;
+    }
+    /*$('#getStats').click(function(){
+        let jsonObjectResponse = [];
+        $.get(' url_for('getalldata') }}', function(data){
+            jsonObjectResponse = data;
+            console.log(JSON.parse(jsonObjectResponse));
+            $.each($.parseJSON(data), function(index, obj){
+                setData(obj.date);
+            })
+        });
+            date = [];
+            data = [];
 
+            /*$.each($.parseJSON(jsonObjectResponse), function(index, obj){
+                dataSearch = obj.month + '-' + obj.day + '-' + obj.year;
+                console.log(dataSearch);
+
+            });
+            console.log(data);
+
+    });
+
+var ctx = document.getElementById("myChart");
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+        datasets: [{
+            label: 'use by day',
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});*/
+</script>
     <script>
 
         $(document).ready(function(){
@@ -61,7 +156,7 @@
                 // FR - HELP On recupére le parametre target de l'utilisateur (le site à crawl)
                 // EN - HELP Get the parameter target of user (website to crawl)
                 let target = $("#inputTarget").val();
-                globalTarget = target;
+
                 // FR - HELP On poste vers /process la site à crawl.
                 // EN - HELP Send data to /process, the website to crawl
                 $.post('{{ url_for('process') }}', {website: target}, function(data){
@@ -75,7 +170,7 @@
                             // FR - HELP Si response.result est "DONE", alors le crawl est terminé, et on peut afficher les resultats.
                             // EN - HELP If response.result is done, then, the crawl is done to and we can show the results
                             if (response.result === 'DONE'){
-                                $('#saveData').attr('class', 'btn btn-primary');
+                                $('#saveData').attr('class', 'btn btn-light');
                                 console.log(response);
 
                                 // FR - HELP On remplie une liste avec les differents resultats.
@@ -116,7 +211,7 @@
                 jsonObject.push({
                     'date':D.getTime(),
                     'month':D.getMonth(),
-                    'day':D.getDay(),
+                    'day':D.getDate(),
                     'year':D.getFullYear(),
                     'target':$('#inputTarget'),
                     'content':$(this).html()
@@ -137,7 +232,7 @@
                     alert('Error refreshing forum items')
                 }
             });
-            $('#modalSaveResult').modal('show')
+            $('#modalSaveResult').modal('show');
 
             //let myBlob = new Blob(JSON.stringify(jsonObject), {type:'text/json'});
 
