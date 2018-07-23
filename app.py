@@ -98,7 +98,7 @@ def results():
     if website not in scrappers_done:
         return jsonify({'result': 'PROCESSING'})
     else:
-        print(storage)
+        #print(storage)
         return jsonify({'result': 'DONE', 'data': storage[website]})
 
 

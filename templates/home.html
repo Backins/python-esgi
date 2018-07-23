@@ -2,8 +2,8 @@
 {% block title %}Home Page{% endblock %}
 {% block body %}
     <div class="jumbotron">
-        <h1>WebCrawler <small>Enter your target!</small></h1>
-
+        <h1>Welcome on the crawler TOSLE </h1>
+        <h2>Please, enter the targeted url website</h2>
         <form action="{{ url_for('process') }}" method="post" id="crawler">
             <div class="form-group">
                 <label for="inputTarget" class="sr-only">Website Address :</label>
@@ -14,7 +14,7 @@
 
         <hr/>
         <h3>Options : </h3>
-            <button id="saveData" class="btn btn-light disabled">Save results</button>
+            <button id="saveData" class="btn btn-light" disabled>Save results</button>
             <!--<button id="getStats" class="btn btn-info" data-toggle="modal" data-target="#modalShowAnalytics">Show analytics</button>-->
             <a href="{{ url_for('static', filename='last-research.json') }}" class="btn btn-success">Download last research</a>
             <a href="{{ url_for('static', filename='all-research.json') }}" class="btn btn-success">Download all research</a>
@@ -74,75 +74,16 @@
 {% endblock %}
 {% block javascript %}
 <script>
-    date = [];
-    data = [];
     function deleteData()
     {
-        if(prompt('Do you want really delete the data ?')){
+        if(prompt('Do you want really delete the data ? Say : yes ') === 'yes'){
             $.get('{{ url_for('deletefiles') }}', function(data){
                 $('#modalDelete').modal('show');
             });
         }
         return false;
     }
-    /*$('#getStats').click(function(){
-        let jsonObjectResponse = [];
-        $.get(' url_for('getalldata') }}', function(data){
-            jsonObjectResponse = data;
-            console.log(JSON.parse(jsonObjectResponse));
-            $.each($.parseJSON(data), function(index, obj){
-                setData(obj.date);
-            })
-        });
-            date = [];
-            data = [];
 
-            /*$.each($.parseJSON(jsonObjectResponse), function(index, obj){
-                dataSearch = obj.month + '-' + obj.day + '-' + obj.year;
-                console.log(dataSearch);
-
-            });
-            console.log(data);
-
-    });
-
-var ctx = document.getElementById("myChart");
-var myChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-        datasets: [{
-            label: 'use by day',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-                'rgba(255, 99, 132, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255,99,132,1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero:true
-                }
-            }]
-        }
-    }
-});*/
 </script>
     <script>
 
@@ -170,8 +111,8 @@ var myChart = new Chart(ctx, {
                             // FR - HELP Si response.result est "DONE", alors le crawl est terminé, et on peut afficher les resultats.
                             // EN - HELP If response.result is done, then, the crawl is done to and we can show the results
                             if (response.result === 'DONE'){
-                                $('#saveData').attr('class', 'btn btn-light');
-                                console.log(response);
+                                $('#saveData').attr('class', 'btn btn-info');
+                                $('#saveData').removeAttr('disabled');
 
                                 // FR - HELP On remplie une liste avec les differents resultats.
                                 // EN - HELP We collect the data and show it in list with the different results
@@ -233,15 +174,6 @@ var myChart = new Chart(ctx, {
                 }
             });
             $('#modalSaveResult').modal('show');
-
-            //let myBlob = new Blob(JSON.stringify(jsonObject), {type:'text/json'});
-
-            console.log(jsonObject);
-            /*listCrawl.children('li').forEach(function(element){
-                jsonObject.push({
-                    'url':element.html()
-                });
-            });*/
         });
     </script>
 {% endblock %}
