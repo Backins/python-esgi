@@ -117,6 +117,6 @@ def savefile():
     jsonarray = request.json
     with open('last-research.json', 'w') as outfile:
         json.dump(jsonarray, outfile)
-    with open('all-research.json', 'w+') as outfile:
+    with open('all-research.json', 'a') as outfile:
         json.dump(jsonarray, outfile)
     return render_template('home.html')
