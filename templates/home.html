@@ -16,8 +16,8 @@
         <h3>Options : </h3>
             <button id="saveData" class="btn btn-light" disabled>Save results</button>
             <!--<button id="getStats" class="btn btn-info" data-toggle="modal" data-target="#modalShowAnalytics">Show analytics</button>-->
-            <a href="{{ url_for('static', filename='last-research.json') }}" class="btn btn-success">Download last research</a>
-            <a href="{{ url_for('static', filename='all-research.json') }}" class="btn btn-success">Download all research</a>
+            <a href="{{ url_for('static', filename='last-research.json') }}" class="btn btn-success" download>Download last research</a>
+            <a href="{{ url_for('static', filename='all-research.json') }}" class="btn btn-success" download>Download all research</a>
             <a href="#" onclick="return deleteData();" class="btn btn-danger">Delete data</a>
 
         <h3>Results : </h3>
